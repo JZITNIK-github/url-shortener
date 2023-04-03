@@ -1,0 +1,13 @@
+version: "3"
+services:
+  url-shorner:
+    container_name: url-shortener
+    volumes:
+        - ./urlShortenerData:/database
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    environment:
+      urlShortenerPath: /url
+      urlShortenerPassword: some-password

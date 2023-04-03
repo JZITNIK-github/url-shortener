@@ -1,13 +1,13 @@
 const express = require('express');
 const fs = require('fs');
 const app = express();
-const pathNotAlowed = [
-    "/api",
-]
-const config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
-
-
-
+var config;
+if (process.env.urlShortenerPath && process.env.urlShortenerPassword) {
+    config = {"port": 3000, "path": process.env.urlShortenerPath, "password": process.env.urlShortenerPassword}
+}
+else {
+    config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
+}
 app.use(express.json())
 app.get('/', (request, response) => {
     fs.readFile('./pages/index.html', 'utf8', (err, data) => {
