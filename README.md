@@ -3,7 +3,7 @@ Lightweight URL Shortener build with node-js.
 # Installation
 1. Clone this repository
 ```
-git clone <this repo>
+git clone https://github.com/JZITNIK-github/url-shortener
 ```
 2. Go to the folder
 ```
