@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .login {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-box {
+            width: 500px;
+            height: 500px;
+            max-width: 95vw;
+            max-height: 95vh;
+            background-color: rgb(202, 202, 202);
+        }
+        .login-box h1 {
+            font-size: 50px;
+            text-align: center;
+        }
+        .login-box input {
+            width: 100%;
+            height: 50px;
+            text-align: center;
+            margin-top: 30px;
+        }
+        .login-box button {
+            width: 100%;
+            height: 50px;
+            text-align: center;
+            margin-top: 312px;
+        }
+        .runningurls {
+            margin: 20px;
+            width: 600px;
+            min-height: 300px;
+            max-width: 95vw;
+            background-color: lightgray;
+        }
+        .create {
+            margin: 20px;
+            width: 300px;
+            min-height: 300px;
+            max-width: 95vw;
+            background-color: lightgray;
+        }
+        .create h1 {
+            font-size: 50px;
+            text-align: center;
+        }
+        .create input {
+            width: 100%;
+            height: 50px;
+            text-align: center;
+            margin-top: 30px;
+        }
+        .create button {
+            width: 100%;
+            height: 50px;
+            text-align: center;
+            margin-top: 113px;
+        }
+    </style>
+    <script>
+        var pass = undefined;
+        function login() {
+            fetch('/api/testpass', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ "pass": document.querySelector(".password").value })
+            })
+            .then(response => response.json())
+            .then(response => {
+                if (response.result == true) {
+                    pass = document.querySelector(".password").value;
+                    document.querySelector(".login").remove();
+                    document.querySelector(".dashboard").style.display = "block";
+                    loadUrls();
+                }
+                else {
+                    alert("Password is incorrect.")
+                }
+            })
+        }
+        function loadUrls() {
+            fetch('/api/geturls/'+pass).then(response => response.json())
+            .then(response => {
+                if (response.result == true) {
+                    const {content, path} = response
+                    if (Object.keys(content).length > 0) {
+                        document.querySelector(".runningurls").innerHTML = "";
+                        for (let k in content) {
+                            document.querySelector(".runningurls").innerHTML += "<div><span><a href='"+path+"/"+k+"'>"+path+"/"+k+"</a> -> <a href='"+content[k]+"'>"+content[k]+"</a></span><button onclick='remove(\""+k+"\")'>Delete</button></div>"
+                        }
+                    }
+                    else {
+                        document.querySelector(".runningurls").innerHTML = "<span>You don't created any url.</span>"
+                    }
+                }
+                else {
+                    alert("You are not logged in!")
+                }
+            })
+        }
+        function remove(key) {
+            fetch('/api/remove', {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ "key": key,"pass": pass })
+            })
+            .then(response => response.json())
+            .then(response => {
+                if (response.result == true) {
+                    loadUrls()
+                }
+                else if (response.result == null) {
+                    alert("Error occurred while removing url!")
+                }
+                else if (response.result == false){
+                    alert("You are not logged in!")
+                }
+            })
+        }
+        function create() {
+            fetch('/api/create', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({"pass": pass,"to":document.querySelector(".url").value })
+            })
+            .then(response => response.json())
+            .then(response => {
+                if (response.result == true) {
+                    document.querySelector(".message").innerHTML = "Url was created! Link: <a href='"+response.from+"'>"+response.from+"</a>"
+                    loadUrls();
+                }
+                else if (response.result == null) {
+                    alert("Error occurred while creating a new url.")
+                }
+                else if (response.result == false){
+                    alert("You are not logged in!")
+                }
+            })
+        }
+    </script>
+</head>
+<body>
+    <div class="login">
+        <div class="login-box">
+            <h1>Login</h1>
+            <input class="password" type="password" placeholder="Password">
+            <button onclick="login()">Login</button>
+        </div>
+    </div>
+    <div class="dashboard" style="display: none;">
+        <div class="runningurls">
+            
+        </div>
+        <div class="create">
+            <h1>Add url</h1>
+            <div class="message"></div>
+            <input type="url" placeholder="url" class="url">
+            <button onclick="create()">Submit</button>
+        </div>
+    </div>
+</body>
+</html>
