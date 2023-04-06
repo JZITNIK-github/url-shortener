@@ -73,7 +73,7 @@ Here change "some-password" to your own password. This password will be used to 
 3. And that's it! Now you can start your server with docker.
 
 ## Manual
-Config file is config.js
+Config file is config.json
 
 1. port
 
